@@ -40,6 +40,8 @@ class DeviceError(Exception):
 
 
 class Device(DeviceBase):
+    default_client_timeout = None
+
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._create_client_session()
@@ -164,7 +166,10 @@ class Device(DeviceBase):
         await self.close()
 
     def _create_client_session(self):
-        self.session = aiohttp.ClientSession()
+        if Device.default_client_timeout is not None:
+            self.session = aiohttp.ClientSession(timeout=Device.default_client_timeout)
+        else:
+            self.session = aiohttp.ClientSession()
 
     async def get_calibration(self) -> np.ndarray:
         """
